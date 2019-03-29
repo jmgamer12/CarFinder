@@ -23,9 +23,11 @@ from django.contrib import admin
 from FindCar import views
 
 urlpatterns = [
-    path('FindCar/', views.home),
+    path('', views.home),
+    path('carfinder.html', views.carfinder),
+    path('home.html', views.home),
     path('admin/', admin.site.urls),
-    path('home', views.home),
+    path('car_submission', views.submission, name='car_submission'),
     path('home/', views.home),
     path('home/carfinder/', views.carfinder),
     path('carfinder/home', views.home),

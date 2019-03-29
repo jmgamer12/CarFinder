@@ -1,19 +1,33 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 # Create your views here.
 #https://docs.djangoproject.com/en/2.1/intro/tutorial03/
 
 from django.http import HttpResponse
 from django.template import loader
-
-
-def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+from .models import Person, Organization, Car
 
 def home(request):
-    home_template = loader.get_template('home.html')
-    return HttpResponse(home_template.render())
+    return render(request, "home.html")
 
 def carfinder(request):
-    cf_template = loader.get_template('carfinder.html')
-    return HttpResponse(cf_template.render())
+    return render(request, "carfinder.html")
+
+def submission(request):
+    print("form submitted -- debug")
+
+#theoretically correct but I'm not sure
+
+    p_name = request.POST["inputName"]
+    p_phone = request.POST["inputPhone"]
+    p_team = request.POST["inputTeam"]
+
+    person = Person(p_name = p_name, phone = p_phone, team = p_team)
+    person.save()
+
+    o_name = request.POST["inputOrg"]
+
+    org = Organization(org_name = o_name)
+    org.save()
+
+    return render(request, "carfinder.html")
