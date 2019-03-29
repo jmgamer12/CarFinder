@@ -1,38 +1,37 @@
 $(document).ready(function () {
 
-    $("#showPostsButton").click(function () {
-        showPosts();
+    $("input[name=riderSelect").click(function () {
+        addToForm();
     });
 
 });
 
-function showPosts() {
+function addToForm() {
+    var radioVal = $("input[name='riderSelect']:checked").val();
+    if(radioVal == "driver"){
+        add_html = '<br>' +
+            '<div class="form-row">' +
+            '    <div class="form-group col-md-6">' +
+            '        <label for="inputCar">Car</label>' +
+            '        <input type="text" class = "form-control" id="inputCar" placeholder="Car">' +
+            '    </div>' +
+            '    <div class="form-group col-md-6">' +
+            '        <label for="inputSeats">Number of Seats</label>' +
+            '        <input type="number" class = "form-control" id="inputSeats" placeholder="# of Seats">' +
+            '    </div>' +
+            '</div>' +
+            '<div>' +
+            '    <label>Time of Departure</label>' +
+            '</div>' +
+            '<select class="form-control">' +
+            '    <option>Early</option>' +
+            '    <option>Late</option>' +
+            '    <option>On time</option>' +
+            '</select>';
+    } else {
+        add_html = '';
+    }
 
-    $.get("https://jsonplaceholder.typicode.com/posts", function (posts, status) {
+    $("#form-extension").html(add_html);
 
-        table_html = '<table class="table">' +
-            '        <thead>' +
-            '        <tr>' +
-            '            <th scope="col">#</th>' +
-            '            <th scope="col">Title</th>' +
-            '            <th scope="col">Body</th>' +
-            '        </tr>' +
-            '        </thead>' +
-            '        <tbody>';
-
-        for (var key in posts) {
-            var post = posts[key];
-            table_html +=
-                '<tr>' +
-                '   <th scope="row">' + post.id + '</th>' +
-                '   <td>' + post.title + '</td>' +
-                '   <td>' + post.body + '</td>' +
-                '</tr>';
-        }
-
-        table_html += '</tbody>' +
-            '</table>';
-
-        $("#table-container").html(table_html);
-    });
 }

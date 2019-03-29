@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+        form {
+            width: 800px;
+            margin: auto;
+        }
+        h1 {
+            width: 1000px;
+            margin: auto;
+            padding-top: 50px;
+        }
+        ul {
+            width: 1000px;
+            margin: auto;
+            padding-top: 50px;
+            padding-bottom: 50px;
+        }
+    </style>
     <!-- https://docs.djangoproject.com/en/2.1/intro/tutorial03/ -->
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
@@ -15,14 +32,52 @@
     <title>Auto Travel Coordinator</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Posts List Demo 1</h1>
-
-        <button type="button" id="showPostsButton" class="btn btn-primary">Show me posts!</button>
-
-        <div id="table-container"></div>
-
-    </div>
+    <h1>Automated Travel Coordinator</h1>
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="nav-link" href="#/home/">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="#/carfinder/">Insert</a>
+        </li>
+    </ul>
+    <form>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputOrg">Organization</label>
+                <input type="text" class = "form-control" id="inputOrg" placeholder="Organization">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputTeam">Team</label>
+                <input type="text" class = "form-control" id="inputTeam" placeholder="Team">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputName">Name</label>
+                <input type="text" class = "form-control" id="inputName" placeholder="Name">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputPhone">Phone</label>
+                <input type="tel" class = "form-control" id="inputPhone" placeholder="Phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEvent">Event</label>
+            <input type="text" class = "form-control" id="inputEvent" placeholder="Event">
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="riderSelect" id="radioRider" value="rider">
+            <label class="form-check-label" for="radioRider">Rider</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="riderSelect" id="radioDriver" value="driver">
+            <label class="form-check-label" for="radioDriver">Driver</label>
+        </div>
+        <div id="form-extension"></div>
+        <br>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
 
 </body>
 </html>
