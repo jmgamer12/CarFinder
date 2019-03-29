@@ -20,7 +20,15 @@ from django.urls import include, path
 
 from django.contrib import admin
 
+from FindCar import views
+
 urlpatterns = [
-    path('FindCar/', include('FindCar.urls')),
+    path('FindCar/', views.home),
     path('admin/', admin.site.urls),
+    path('home', views.home),
+    path('home/', views.home),
+    path('home/carfinder/', views.carfinder),
+    path('carfinder/home', views.home),
+    path('carfinder', views.carfinder),
+    path('carfinder/', views.carfinder)
 ]
