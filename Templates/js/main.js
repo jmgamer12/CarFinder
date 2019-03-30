@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-    $("input[name=riderSelect").click(function () {
+    $("input[name=riderSelect]").click(function () {
         addToForm();
     });
 
