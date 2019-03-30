@@ -5,26 +5,32 @@ from django.contrib.contenttypes.models import ContentType
 
 
 class Person(models.Model):
-    PID = models.ForeignKey('Driver', verbose_name="PersonID", primary_key=True, on_delete=models.CASCADE, unique=True)
-    p_name = models.CharField("Person's Name", max_length=45)
-    phone = models.PositiveIntegerField("Phone Number", max_length=9)
-    team = models.CharField("SubTeam", max_length=45)
-    departTime = models.CharField(verbose_name="DepartTime", max_length=9)
+    org = models.ForeignKey('Organization', on_delete=models.CASCADE)
+    p_name = models.CharField("Person's Name", max_length=45, default="")
+    phone = models.PositiveIntegerField("Phone Number")
+    team = models.CharField("SubTeam", max_length=45, default="")
+    departTime = models.CharField(verbose_name="DepartTime", max_length=9, default="")
+    #PID = models.ForeignKey('Driver', verbose_name="PersonID", primary_key=True, on_delete=models.CASCADE, unique=True)
+
 
 
 class Event(models.Model):
-    EID = models.ForeignKey('Person', verbose_name="EventID", primary_key=True, unique=True, on_delete=models.CASCADE)
     time = models.DateTimeField()
-    location = models.CharField("Location", max_length=45)
+    location = models.CharField("Location", max_length=45, default="")
+    #EID = models.ForeignKey('Person', verbose_name="EventID", primary_key=True, unique=True, on_delete=models.CASCADE)
+
 
 
 class Car(models.Model):
-    CID = models.ForeignKey('Driver', verbose_name="CarID", primary_key=True, on_delete=models.CASCADE, unique=True)
     numSeats = models.PositiveIntegerField("#Seats")
     timeDepart = models.DateTimeField()
+    #CID = models.ForeignKey('Driver', verbose_name="CarID", primary_key=True, on_delete=models.CASCADE, unique=True)
+
 
 class Driver(models.Model):
-    pass
+    PID = models.ForeignKey('Person', on_delete=models.CASCADE)
+    CID = models.ForeignKey('Car', on_delete=models.CASCADE)
 
 class Organization(models.Model):
-    org_name = models.ForeignKey(Person, verbose_name="Name", on_delete=models.CASCADE)
+    org_name = models.CharField("Org. Name", max_length=45, default="Track")
+
