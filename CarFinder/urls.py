@@ -34,5 +34,7 @@ urlpatterns = [
     path('carfinder/', views.carfinder),
     path('remove_person_temp.html', views.remove_person, name='remove_person'),
     path('update_person', views.update_person, name='update_person'),
-    path('update.html', views.update)
+    path('update.html', views.update),
+    path('search.html', views.search),
+    path('search_return', views.search_return, name='search_return')
 ]

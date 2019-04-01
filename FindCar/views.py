@@ -14,19 +14,14 @@ org_idd = 1
 EID = 100
 CID = 1
 
-def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
-
-
+# Home page
 def home(request):
     home_template = loader.get_template('home.html')
     return HttpResponse(home_template.render())
 
-
+# INSERT functionality
 def carfinder(request):
     return render(request, 'insert.html')
-
-
 def submission(request):
     cursor = connection.cursor()
     global PID, org_idd
@@ -59,6 +54,8 @@ def submission(request):
 
     return render(request, 'insert.html')
 
+
+# DELETE functionality
 def remove_person(request):
     cursor = connection.cursor()
     p_name = request.POST.get('removeInput')
@@ -84,6 +81,7 @@ in the table via try/except (if not in table cursor.fetchone should return a pro
 If present then proceed to update table as the usual. Also if you could, change the remove function to
 be a raw query as well
 '''
+# UPDATE functionality
 def update(request):
     return render(request, 'update.html')
 def update_person(request):
@@ -108,7 +106,19 @@ def update_person(request):
 
     return render(request, 'update.html')
 
+# SEARCH functionality
+def search(request):
+    return render(request, 'search.html')
+def search_return(request):
+    cursor = connection.cursor()
+    p_name = request.POST.get('searchP')
+    print('Search for', p_name)
 
+    # TODO write the Search function
+    # https://stackoverflow.com/questions/7287027/displaying-a-table-in-django-from-database
+
+
+    return render(request, 'search.html')
 
 
 

@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>FindCar: The Automated Travel Coordinator</title>
     <style>
+        form {
+            width: 800px;
+            margin: auto;
+        }
         h1 {
             width: 1000px;
             margin: auto;
@@ -24,18 +26,19 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 
-
     {% load static %}
     <script src = "{% static 'main.js' %}"></script>
+    <meta charset="UTF-8">
+    <title>Auto Travel Coordinator</title>
 </head>
 <body>
     <h1>Automated Travel Coordinator</h1>
     <ul class="nav nav-pills">
         <li class="nav-item">
-            <a class="nav-link active" href="/home">Home</a>
+            <a class="nav-link" href="/home">Home</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="/home/carfinder/">Insert</a>
+            <a class="nav-link" href="/home/carfinder">Insert</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="/remove_person_temp.html">Remove</a>
@@ -44,8 +47,20 @@
             <a class="nav-link" href="/update.html">Update Record</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="/search.html">Search</a>
+            <a class="nav-link active" href="/search.html">Search</a>
         </li>
     </ul>
+    <div class="container">
+        <form class="contact-form" method="post" action="/search_return">
+            {% csrf_token %}
+                <div class="form-group col-md-6">
+                    <label for="searchP">Person</label>
+                    <input type="text" name="searchP" class = "form-control" id="searchP" placeholder="Person to Search (Case Sensitive)">
+                </div>
+                <div class="form-group col-md-6">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+        </form>
+    </div>
 </body>
 </html>
