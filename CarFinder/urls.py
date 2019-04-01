@@ -27,10 +27,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('car_submission', views.submission, name='car_submission'),
     path('home/', views.home),
-    path('carfinder.html', views.carfinder),
+    path('insert.html', views.carfinder),
     path('home/carfinder/', views.carfinder),
     path('carfinder/home', views.home),
     path('carfinder', views.carfinder),
     path('carfinder/', views.carfinder),
-    path('remove_person_temp.html', views.remove_person, name='remove_person')
+    path('remove_person_temp.html', views.remove_person, name='remove_person'),
+    path('update_person', views.update_person, name='update_person')
 ]

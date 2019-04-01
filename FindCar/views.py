@@ -23,7 +23,7 @@ def home(request):
 
 
 def carfinder(request):
-    return render(request, 'carfinder.html')
+    return render(request, 'insert.html')
 
 
 def submission(request):
@@ -56,9 +56,38 @@ def submission(request):
     connection.commit()
     #person.save()
 
-    return render(request, 'carfinder.html')
+    return render(request, 'insert.html')
 
 def remove_person(request):
     per_name = request.POST.get("removeInput")
     death = Person.objects.filter(p_name=per_name).delete()
     return render(request, 'remove_person_temp.html')
+
+'''
+This function is supposed to find the name given in the form and determine if it is actually present
+in the table via try/except (if not in table cursor.fetchone should return a programming error)
+
+If present then proceed to update table as the usual. Also if you could, change the remove function to
+be a raw query as well
+'''
+def update_person(request):
+    cursor = connection.cursor()
+    p_name = request.POST.get('personName')
+    print("Person Name", p_name)
+    cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'").format(p_name)
+    try:
+        result_set = cursor.fetchone()[0]
+        if (result_set):
+            p_phone = request.POST.get("inputPhone", '')
+            p_team = request.POST.get("teamInput", '')
+            o_name = request.POST.get("orgInput")
+            cursor.execute("UPDATE findcar_person phone='{}', team='{}' WHERE p_name='{}'").format(p_phone, p_team, p_name)
+    except connection.ProgrammingError:
+        print("Exception Occured")
+
+    return render(request, 'update.html')
+
+
+
+
+
