@@ -50,9 +50,12 @@
     <div class="container">
         <form class="contact-form" method="post" action="/update_person">
             {% csrf_token %}
-            <div class="form-group col-md-6">
-                    <label for="inputName">Person</label>
+            <div class="form-group">
+                    <label for="inputName">Person to be updated</label>
                     <input type="text" name="personName" class = "form-control" id="inputName" placeholder="Insert Name Here (Case Sensitive)">
+            </div>
+            <div>
+                <label><b>Information:</b></label>
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">

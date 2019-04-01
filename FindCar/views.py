@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.template import loader
 from .models import Person, Organization, Car
 from django.db import connection, transaction
+import MySQLdb as my
 
 PID = 1000
 org_idd = 1
@@ -59,8 +60,21 @@ def submission(request):
     return render(request, 'insert.html')
 
 def remove_person(request):
-    per_name = request.POST.get("removeInput")
-    death = Person.objects.filter(p_name=per_name).delete()
+    cursor = connection.cursor()
+    p_name = request.POST.get('removeInput')
+    print("Person Name", p_name)
+    cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'".format(p_name))
+    try:
+        result_set = cursor.fetchone()[0]
+        if result_set:
+            cursor.execute("DELETE FROM findcar_person WHERE p_name='{}'".format(p_name))
+    except my.DataError:
+        print("DataError")
+    except my.ProgrammingError:
+        print("Exception Occured")
+    except:
+        print("Unknown Error")
+
     return render(request, 'remove_person_temp.html')
 
 '''
@@ -70,20 +84,27 @@ in the table via try/except (if not in table cursor.fetchone should return a pro
 If present then proceed to update table as the usual. Also if you could, change the remove function to
 be a raw query as well
 '''
+def update(request):
+    return render(request, 'update.html')
 def update_person(request):
     cursor = connection.cursor()
     p_name = request.POST.get('personName')
     print("Person Name", p_name)
-    cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'").format(p_name)
+    cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'".format(p_name))
     try:
         result_set = cursor.fetchone()[0]
         if (result_set):
             p_phone = request.POST.get("inputPhone", '')
             p_team = request.POST.get("teamInput", '')
-            o_name = request.POST.get("orgInput")
-            cursor.execute("UPDATE findcar_person phone='{}', team='{}' WHERE p_name='{}'").format(p_phone, p_team, p_name)
-    except connection.ProgrammingError:
+            #o_name = request.POST.get("orgInput")
+            cursor.execute("UPDATE findcar_person SET phone='{}', team='{}' WHERE p_name='{}'".format(p_phone, p_team, p_name))
+
+    except my.DataError:
+        print("DataError")
+    except my.ProgrammingError:
         print("Exception Occured")
+    except:
+        print("Unknown Error")
 
     return render(request, 'update.html')
 
