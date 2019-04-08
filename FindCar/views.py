@@ -15,6 +15,7 @@ org_idd = 1
 EID = 100
 CID = 1
 
+
 # Home page
 def home(request):
     context = {"home_page": "active"}
@@ -22,10 +23,33 @@ def home(request):
     #home_template = loader.get_template('home.html')
     #return HttpResponse(home_template.render())
 
+
 # INSERT functionality
 def insert(request):
-    context = {"insert_page": "active"}
+    cursor = connection.cursor()
+    cursor.execute("SELECT * from findcar_organization")
+    org_list = []
+
+    try:
+        #result_set = cursor.fetchall()
+        for row in cursor.fetchall():
+            orgTup = namedtuple('OrgTup', 'id org_name')
+            org_i = orgTup(row[0], row[1])
+            org_list.append(org_i)
+
+        #p1 = PersonTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5])
+        #print(result_set)
+    except my.DataError:
+        print("DataError")
+    except my.ProgrammingError:
+        print("Exception Occured")
+    except:
+        print("Unknown Error")
+
+    context = {'items': org_list, "insert_page": "active"}
     return render(request, 'insert.html', context)
+
+
 def submission(request):
     cursor = connection.cursor()
     global PID, org_idd
@@ -64,6 +88,8 @@ def submission(request):
 def remove(request):
     context = {"remove_page" : "active"}
     return render(request, 'remove.html', context)
+
+
 def remove_person(request):
     cursor = connection.cursor()
     p_name = request.POST.get('removeInput')
@@ -90,10 +116,14 @@ in the table via try/except (if not in table cursor.fetchone should return a pro
 If present then proceed to update table as the usual. Also if you could, change the remove function to
 be a raw query as well
 '''
+
+
 # UPDATE functionality
 def update(request):
     context = {"update_page" : "active"}
     return render(request, 'update.html', context)
+
+
 def update_person(request):
     cursor = connection.cursor()
     p_name = request.POST.get('personName')
@@ -117,10 +147,13 @@ def update_person(request):
     context = {"update_page": "active"}
     return render(request, 'update.html', context)
 
+
 # SEARCH functionality
 def search(request):
     context = {"search_page": "active"}
     return render(request, 'search.html', context)
+
+
 def search_return(request):
     cursor = connection.cursor()
     p_name = request.POST.get('personName')
