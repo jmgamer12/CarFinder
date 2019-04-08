@@ -18,7 +18,7 @@ class Event(models.Model):
     time = models.DateTimeField()
     location = models.CharField("Location", max_length=45, default="")
     org_name = models.CharField("Organization Name", max_length=45, default="Track")
-    ev_name = models.CharField("Event Name", max_length=45)
+    ev_name = models.CharField("Event Name", max_length=45, default="")
     #EID = models.ForeignKey('Person', verbose_name="EventID", primary_key=True, unique=True, on_delete=models.CASCADE)
 
 
