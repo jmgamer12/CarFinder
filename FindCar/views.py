@@ -8,6 +8,7 @@ from django.template import loader
 from .models import Person, Organization, Car
 from django.db import connection, transaction
 import MySQLdb as my
+from collections import namedtuple
 
 PID = 1000
 org_idd = 1
@@ -16,12 +17,15 @@ CID = 1
 
 # Home page
 def home(request):
-    home_template = loader.get_template('home.html')
-    return HttpResponse(home_template.render())
+    context = {"home_page": "active"}
+    return render(request, 'home.html', context)
+    #home_template = loader.get_template('home.html')
+    #return HttpResponse(home_template.render())
 
 # INSERT functionality
-def carfinder(request):
-    return render(request, 'insert.html')
+def insert(request):
+    context = {"insert_page": "active"}
+    return render(request, 'insert.html', context)
 def submission(request):
     cursor = connection.cursor()
     global PID, org_idd
@@ -52,10 +56,14 @@ def submission(request):
     connection.commit()
     #person.save()
 
-    return render(request, 'insert.html')
+    context = {"insert_page": "active"}
+    return render(request, 'insert.html', context)
 
 
 # DELETE functionality
+def remove(request):
+    context = {"remove_page" : "active"}
+    return render(request, 'remove.html', context)
 def remove_person(request):
     cursor = connection.cursor()
     p_name = request.POST.get('removeInput')
@@ -72,7 +80,8 @@ def remove_person(request):
     except:
         print("Unknown Error")
 
-    return render(request, 'remove_person_temp.html')
+    context = {"remove_page": "active"}
+    return render(request, 'remove.html', context)
 
 '''
 This function is supposed to find the name given in the form and determine if it is actually present
@@ -83,7 +92,8 @@ be a raw query as well
 '''
 # UPDATE functionality
 def update(request):
-    return render(request, 'update.html')
+    context = {"update_page" : "active"}
+    return render(request, 'update.html', context)
 def update_person(request):
     cursor = connection.cursor()
     p_name = request.POST.get('personName')
@@ -104,21 +114,30 @@ def update_person(request):
     except:
         print("Unknown Error")
 
-    return render(request, 'update.html')
+    context = {"update_page": "active"}
+    return render(request, 'update.html', context)
 
 # SEARCH functionality
 def search(request):
-    return render(request, 'search.html')
+    context = {"search_page": "active"}
+    return render(request, 'search.html', context)
 def search_return(request):
     cursor = connection.cursor()
-    p_name = request.POST.get('searchP')
-    print('Search for', p_name)
+    p_name = request.POST.get('personName')
+    print("Person Name", p_name)
+    cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'".format(p_name))
 
-    # TODO write the Search function
-    # https://stackoverflow.com/questions/7287027/displaying-a-table-in-django-from-database
+    try:
+        result_set = cursor.fetchone()
+        context = {'object': result_set, "search_page": "active"}
+        print(result_set)
 
+    except my.DataError:
+        print("DataError")
+    except my.ProgrammingError:
+        print("Exception Occured")
+    except:
+        print("Unknown Error")
 
-    return render(request, 'search.html')
-
-
+    return render(request, 'search.html', context)
 

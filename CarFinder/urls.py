@@ -25,16 +25,18 @@ from FindCar import views
 urlpatterns = [
     path('', views.home),
     path('admin/', admin.site.urls),
-    path('car_submission', views.submission, name='car_submission'),
-    path('home/', views.home),
-    path('insert.html', views.carfinder),
-    path('home/carfinder/', views.carfinder),
-    path('carfinder/home', views.home),
-    path('carfinder', views.carfinder),
-    path('carfinder/', views.carfinder),
-    path('remove_person_temp.html', views.remove_person, name='remove_person'),
-    path('update_person', views.update_person, name='update_person'),
-    path('update.html', views.update),
-    path('search.html', views.search),
-    path('search_return', views.search_return, name='search_return')
+
+    path('home/', views.home, name='home'),
+
+    path('insert/', views.insert, name='insert'),
+    path('insert_submit/', views.submission, name='insert_submit'),
+
+    path('remove/', views.remove, name='remove'),
+    path('remove_person/', views.remove_person, name='remove_person'),
+
+    path('update/', views.update, name='update'),
+    path('update_person/', views.update_person, name='update_person'),
+
+    path('search/', views.search, name='search'),
+    path('search_return/', views.search_return, name='search_return')
 ]

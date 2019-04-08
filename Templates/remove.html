@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <form class="contact-form" method="post" action="/remove_person/">
+            {% csrf_token %}
+                <div class="form-group col-md-6">
+                    <label for="removeInput">Person</label>
+                    <input type="text" name="removeInput" class = "form-control" id="removeInput" placeholder="Person to Remove">
+                </div>
+                <div class="form-group col-md-6">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+        </form>
+    </div>
+{% endblock %}
