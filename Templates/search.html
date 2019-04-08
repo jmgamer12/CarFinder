@@ -16,10 +16,11 @@
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
-
-      <h1>{{ object.p_name }}</h1>
-      <p>{{ object.org }}</p>
-      <p>{{ object.phone }}</p>
-      <p>{{ object.team }}</p>
+    <div class="container">
+      <p>{{ object.p_name }}</p>
+        <p>{{ object.org_id }}</p>
+        <p>{{ object.phone }}</p>
+        <p>{{ object.team }}</p>
+    </div>
 
 {% endblock %}

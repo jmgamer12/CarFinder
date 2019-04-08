@@ -129,7 +129,11 @@ def search_return(request):
 
     try:
         result_set = cursor.fetchone()
-        context = {'object': result_set, "search_page": "active"}
+
+        PersonTup = namedtuple('PersonTup', 'id p_name phone team departTime org_id')
+        p1 = PersonTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5])
+
+        context = {'object': p1, "search_page": "active"}
         print(result_set)
 
     except my.DataError:
