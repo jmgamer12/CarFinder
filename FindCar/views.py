@@ -31,7 +31,7 @@ def submission(request):
         form = request.POST.copy()
     print("FormType", form)
     '''
-    
+
     org = Organization(org_name=o_name)
     org_id += 1
     org.save()
@@ -110,15 +110,31 @@ def update_person(request):
 def search(request):
     return render(request, 'search.html')
 def search_return(request):
-    cursor = connection.cursor()
-    p_name = request.POST.get('searchP')
-    print('Search for', p_name)
+    # cursor = connection.cursor()
+    # p_name = request.POST.get('searchP')
+    # print('Search for', p_name)
 
     # TODO write the Search function
     # https://stackoverflow.com/questions/7287027/displaying-a-table-in-django-from-database
 
+    cursor = connection.cursor()
+    p_name = request.POST.get('personName')
+    print("Person Name", p_name)
+    cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'".format(p_name))
+
+    try:
+        result_set = cursor.fetchone()[0]
+        context = {'object' : result_set}
+
+    except my.DataError:
+        print("DataError")
+    except my.ProgrammingError:
+        print("Exception Occured")
+    except:
+        print("Unknown Error")
+
+    # name = request.POST.get('personName')
+    # obj= Person.objects.get(p_name='Tom')
+    # context = {'object' : obj}
 
     return render(request, 'search.html')
-
-
-

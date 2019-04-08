@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+s<!DOCTYPE html>
 <html lang="en">
 <head>
     <style>
@@ -38,7 +38,7 @@
             <a class="nav-link" href="/home">Home</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="/home/carfinder">Insert</a>
+            <a class="nav-link" href="insert.html">Insert</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="/remove_person_temp.html">Remove</a>
@@ -47,20 +47,32 @@
             <a class="nav-link" href="/update.html">Update Record</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" href="/search.html">Search</a>
+            <a class="nav-link active" href="/search.html">Search Record</a>
         </li>
     </ul>
     <div class="container">
-        <form class="contact-form" method="post" action="/search_return">
+        <form class="contact-form" method="post" action="/car_submission">
             {% csrf_token %}
+            <div class="form-row">
                 <div class="form-group col-md-6">
-                    <label for="searchP">Person</label>
-                    <input type="text" name="searchP" class = "form-control" id="searchP" placeholder="Person to Search (Case Sensitive)">
+                    <label for="inputName">Name</label>
+                    <input type="text" name="personName" class = "form-control" id="inputName" placeholder="Name">
                 </div>
-                <div class="form-group col-md-6">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
+
+            </div>
+
+            <div id="form-extension"></div>
+            <br>
+            <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
+
+    {% block content %}
+      <h1>{{ object.p_name }}</h1>
+      <p>{{ object.org }}</p>
+      <p>{{ object.phone }}</p>
+      <p>{{ object.team }}</p>
+  {% endblock %}
+
 </body>
 </html>
