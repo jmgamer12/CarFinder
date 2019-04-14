@@ -175,6 +175,33 @@ def search_return(request):
         print("Exception Occured")
     except:
         print("Unknown Error")
+        return render(request, 'search.html')
 
     return render(request, 'search.html', context)
 
+def match(request):
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM findcar_person;")
+
+    try:
+        result_set = cursor.fetchall()
+        p1 = []
+
+        PersonTup = namedtuple('PersonTup', 'id p_name phone team departTime org_id')
+        for x in result_set:
+            temp_person = PersonTup(x[0], x[1], x[2], x[3], x[4], x[5])
+            p1.append(temp_person)
+
+        context = {"match_page": "active", "people": p1}
+
+    except my.DataError:
+        print("DataError")
+        return render(request, 'match.html')
+    except my.ProgrammingError:
+        print("Exception Occured")
+        return render(request, 'match.html')
+    except:
+        print("Unknown Error")
+        return render(request, 'match.html')
+
+    return render(request, 'match.html', context)
