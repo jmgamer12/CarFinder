@@ -19,6 +19,18 @@
             padding-top: 50px;
             padding-bottom: 50px;
         }
+        table{
+            table-layout: fixed;
+            width: 45%;
+            margin: auto;
+            padding-top:25px;
+            border: 1px solid #ddd;
+        }
+        th, td {
+            border-bottom: 1px solid #ddd;
+            padding: 4px;
+        }
+        tr:hover {background-color: #f5f5f5;}
     </style>
     <!-- https://docs.djangoproject.com/en/2.1/intro/tutorial03/ -->
     <!-- Bootstrap CSS -->
@@ -42,13 +54,16 @@
             <a class="nav-link {{ insert_page }}" href="{% url 'insert' %}">Insert</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link {{ remove_page }}" href="{% url 'remove_person' %}">Remove</a>
+            <a class="nav-link {{ remove_page }}" href="{% url 'remove' %}">Remove</a>
         </li>
         <li class="nav-item">
             <a class="nav-link {{ update_page }}" href="{% url 'update' %}">Update Record</a>
         </li>
         <li class="nav-item">
             <a class="nav-link {{ search_page }}" href="{% url 'search' %}">Search</a>
+        </li>
+        <li class="nav-item">
+	        <a class="nav-link {{ match_page }}" href="{% url 'match' %}">Match</a>
         </li>
     </ul>
 

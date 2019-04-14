@@ -38,5 +38,7 @@ urlpatterns = [
     path('update_person/', views.update_person, name='update_person'),
 
     path('search/', views.search, name='search'),
-    path('search_return/', views.search_return, name='search_return')
+    path('search_return/', views.search_return, name='search_return'),
+
+    path('match/', views.match, name='match')
 ]
