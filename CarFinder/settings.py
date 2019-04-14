@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+GOOGLE_MAPS_API_KEY = 'AIzaSyAXN5KZPDicKYQqTDl_TxVR4G_Y7BNaNdg'
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'FindCar.apps.FindcarConfig',
+    'django_google_maps'
 ]
 
 MIDDLEWARE = [

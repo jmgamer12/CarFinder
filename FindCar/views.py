@@ -37,6 +37,8 @@ def insert(request):
             org_i = orgTup(row[0], row[1])
             org_list.append(org_i)
 
+        org_list = list(dict.fromkeys(org_list))
+
         #p1 = PersonTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5])
         #print(result_set)
     except my.DataError:
