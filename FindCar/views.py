@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-
+from collections import OrderedDict
 # Create your views here.
 #https://docs.djangoproject.com/en/2.1/intro/tutorial03/
 
@@ -15,6 +15,9 @@ org_idd = 1
 EID = 100
 CID = 1
 
+org_list = []
+org_list_final = []
+
 
 # Home page
 def home(request):
@@ -26,9 +29,10 @@ def home(request):
 
 # INSERT functionality
 def insert(request):
+    global org_list_final, org_list
     cursor = connection.cursor()
     cursor.execute("SELECT * from findcar_organization")
-    org_list = []
+
 
     try:
         #result_set = cursor.fetchall()
@@ -37,7 +41,7 @@ def insert(request):
             org_i = orgTup(row[0], row[1])
             org_list.append(org_i)
 
-        org_list = list(dict.fromkeys(org_list))
+        add_org_list(org_list)
 
         #p1 = PersonTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5])
         #print(result_set)
@@ -48,42 +52,69 @@ def insert(request):
     except:
         print("Unknown Error")
 
-    context = {'items': org_list, "insert_page": "active"}
+    context = {'items': org_list_final, "insert_page": "active"}
     return render(request, 'insert.html', context)
 
 
+def add_org_list(org_list):
+    global org_list_final
+    for i in org_list:
+        print(i[1])
+        org_list_final.append(i[1])
+    org_list_final = list(OrderedDict.fromkeys(org_list_final))
+    print(org_list_final)
+
+
 def submission(request):
+
     cursor = connection.cursor()
-    global PID, org_idd
+    global PID, org_idd, org_list_final, org_list
     print("form submitted -- debug")
     form = None
     if request.method == 'POST':
         form = request.POST.copy()
     print("FormType", form)
-    '''
-    
-    org = Organization(org_name=o_name)
-    org_id += 1
-    org.save()
-    '''
-    o_name = request.POST.get("orgInput")
+
+
+    o_name = request.POST.get("org_select", '')
+    o_add_name = request.POST.get("inputOrg", '')
     p_name = request.POST.get('personName')
     print("Person Name", p_name)
     p_phone = request.POST.get("inputPhone", '')
     p_team = request.POST.get("teamInput", '')
-    departTime= ""
 
-    cursor.execute(
-        "INSERT INTO findcar_organization (org_name) VALUES ('{}')".format(
-            o_name))
+    departTime= ""
+    if (o_add_name != ""):
+        org_list_final.append(o_add_name)
+        cursor.execute(
+            "INSERT INTO findcar_organization (org_name) VALUES ('{}')".format(
+                o_add_name))
+
+    else:
+        cursor.execute(
+            "INSERT INTO findcar_organization (org_name) VALUES ('{}')".format(
+                o_name))
     connection.commit()
     #person = Person(p_name=p_name, phone=p_phone, team=p_team)
-    cursor.execute("INSERT INTO findcar_person (p_name, phone, team, departTime, org_id) VALUES ('{}', '{}', '{}', '{}', '{}')".format(p_name, p_phone, p_team, departTime, org_idd))
+
+    cursor.execute("INSERT INTO findcar_person (p_name, phone, team, departTime, isDriver, org_id) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(p_name, p_phone, p_team, departTime, 0, org_idd))
     connection.commit()
     #person.save()
 
-    context = {"insert_page": "active"}
+    refill_org_list(org_list_final)
+    context = {"insert_page": "active", 'items': org_list_final}
     return render(request, 'insert.html', context)
+
+
+def refill_org_list(org_list_final):
+    cursor = connection.cursor()
+    cursor.execute("SELECT * from findcar_organization")
+    org_list_temp = []
+    for row in cursor.fetchall():
+        orgTup = namedtuple('OrgTup', 'id org_name')
+        org_i = orgTup(row[0], row[1])
+        org_list_temp.append(org_i)
+    add_org_list(org_list_temp)
 
 
 # DELETE functionality

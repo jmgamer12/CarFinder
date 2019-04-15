@@ -11,7 +11,7 @@ class Person(models.Model):
     phone = models.PositiveIntegerField("Phone Number")
     team = models.CharField("SubTeam", max_length=45, default="")
     departTime = models.CharField(verbose_name="DepartTime", max_length=9, default="")
-    isDriver = models.PositiveIntegerField("Driver Boolean", default=0)
+    isDriver = models.IntegerField("Driver Boolean", default=0)
     #PID = models.ForeignKey('Driver', verbose_name="PersonID", primary_key=True, on_delete=models.CASCADE, unique=True)
 
 
