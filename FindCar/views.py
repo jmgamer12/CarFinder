@@ -186,20 +186,25 @@ def search(request):
     context = {"search_page": "active"}
     return render(request, 'search.html', context)
 
-
 def search_return(request):
     cursor = connection.cursor()
-    p_name = request.POST.get('personName')
-    print("Person Name", p_name)
-    cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'".format(p_name))
-
+    query_input = request.POST.get('inputName')
+    search_by = request.POST.get('query_select')
+    person_list=[]
+    print("Search By", search_by)
+    print("Query Input", query_input)
+    if(search_by=="Person"):
+        cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'".format(query_input))
+    elif(search_by=="Team"):
+        cursor.execute("SELECT * FROM findcar_person WHERE team='{}'".format(query_input))
+    elif(search_by=="Org"):
+        cursor.execute("SELECT * FROM findcar_person, findcar_organization WHERE findcar_organization.org_name='{}' AND findcar_organization.id=findcar_person.org_id;".format(query_input))
     try:
-        result_set = cursor.fetchone()
-
-        PersonTup = namedtuple('PersonTup', 'id p_name phone team departTime org_id')
-        p1 = PersonTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5])
-
-        context = {'object': p1, "search_page": "active"}
+        for result_set in cursor.fetchall():
+            PersonTup = namedtuple('PersonTup', 'id p_name phone team departTime org_id')
+            person_i = PersonTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5])
+            person_list.append(person_i)
+        context = {'objects': person_list, "search_page": "active"}
         print(result_set)
 
     except my.DataError:
@@ -211,6 +216,7 @@ def search_return(request):
         return render(request, 'search.html')
 
     return render(request, 'search.html', context)
+
 
 def match(request):
     cursor = connection.cursor()
