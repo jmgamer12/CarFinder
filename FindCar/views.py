@@ -43,6 +43,8 @@ def insert(request):
 
         add_org_list(org_list)
 
+        #cursor.execute("SELECT * FROM Driver NATURAL JOIN Person")
+
         #p1 = PersonTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5])
         #print(result_set)
     except my.DataError:
@@ -52,38 +54,49 @@ def insert(request):
     except:
         print("Unknown Error")
 
-    context = {'items': org_list_final, "insert_page": "active"}
+    drivers = getDrivers()
+    context = {'items': org_list_final, "insert_page": "active", 'drivers': drivers}
     return render(request, 'insert.html', context)
 
 
 def add_org_list(org_list):
     global org_list_final
     for i in org_list:
-        print(i[1])
-        org_list_final.append(i[1])
+       # print(i[1])
+        org_list_final.append(i)
     org_list_final = list(OrderedDict.fromkeys(org_list_final))
-    print(org_list_final)
+   # print(org_list_final)
 
 
 def submission(request):
 
     cursor = connection.cursor()
     global PID, org_idd, org_list_final, org_list
-    print("form submitted -- debug")
+    #print("form submitted -- debug")
     form = None
     if request.method == 'POST':
         form = request.POST.copy()
-    print("FormType", form)
+    #print("FormType", form)
 
 
     o_name = request.POST.get("org_select", '')
     o_add_name = request.POST.get("inputOrg", '')
     p_name = request.POST.get('personName')
-    print("Person Name", p_name)
+    #print("Person Name", p_name)
     p_phone = request.POST.get("inputPhone", '')
     p_team = request.POST.get("teamInput", '')
 
-    departTime= ""
+    #check radio button status
+    radioDR = request.POST.get('riderSelect')
+    if radioDR == 'driver':
+        # new driver to db
+        d_car = request.POST.get('inputCar')
+        d_carspl = d_car.split(' ')
+        d_numSeats = request.POST.get('inputSeats')
+        cursor.execute("INSERT INTO findcar_car (numSeats, timeDepart, make, model, year) VALUES ('{}', '{}', '{}', '{}', '{}')".format(d_numSeats, '0000-00-00 00:00:00', d_carspl[1], d_carspl[2], d_carspl[0]))
+        connection.commit()
+
+
     if (o_add_name != ""):
         org_list_final.append(o_add_name)
         cursor.execute(
@@ -97,12 +110,30 @@ def submission(request):
     connection.commit()
     #person = Person(p_name=p_name, phone=p_phone, team=p_team)
 
-    cursor.execute("INSERT INTO findcar_person (p_name, phone, team, departTime, isDriver, org_id) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(p_name, p_phone, p_team, departTime, 0, org_idd))
+    cursor.execute("INSERT INTO findcar_person (p_name, phone, team, departTime, isDriver, org_id) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(p_name, p_phone, p_team, '', 0, org_idd))
     connection.commit()
-    #person.save()
+
+    #get id of inserted person
+    cursor.execute("SELECT id FROM findcar_person WHERE p_name = '{}'".format(p_name))
+    person_id = cursor.fetchone()[0]
+
+    if radioDR == 'driver':
+        # adds connection to driver subclass
+        cursor.execute("SELECT id FROM findcar_car WHERE numSeats = '{}' AND make = '{}'".format(d_numSeats, d_carspl[1]))
+        car_id = cursor.fetchone()[0]
+        #print('person id = ', person_id, ' car id = ', car_id)
+        cursor.execute("INSERT INTO findcar_driver (CID_id, PID_id) VALUES ('{}', '{}')".format(car_id, person_id))
+    else:
+        # adds connection to rider subclass
+        r_prefDrive = request.POST.get('inputPref')
+        r_drivername = r_prefDrive.split(" -- ")
+        cursor.execute("SELECT id FROM findcar_person WHERE p_name = '{}'".format(r_drivername[0]))
+        r_driverid = cursor.fetchone()[0]
+        cursor.execute("INSERT INTO findcar_rider (preferredDriver, PID_id) VALUES ('{}', '{}')".format(r_driverid, person_id))
 
     refill_org_list(org_list_final)
-    context = {"insert_page": "active", 'items': org_list_final}
+    drivers = getDrivers()
+    context = {"insert_page": "active", 'items': org_list_final, 'drivers': drivers}
     return render(request, 'insert.html', context)
 
 
@@ -116,6 +147,19 @@ def refill_org_list(org_list_final):
         org_list_temp.append(org_i)
     add_org_list(org_list_temp)
 
+def getDrivers():
+    cursor = connection.cursor()
+    cursor.execute("SELECT p.p_name, p.phone, p.team, c.numSeats, o.org_name from findcar_driver d LEFT JOIN findcar_person p ON d.PID_id = p.id LEFT JOIN findcar_car c ON d.CID_id = c.id LEFT JOIN findcar_organization o ON p.org_id = o.id;")
+    drivers = cursor.fetchall()
+    driTup = namedtuple('driTup', 'name')
+    driver_default = driTup("No Preference")
+    driver_final = [driver_default]
+    for driver in drivers:
+        drive_temp = "{} -- Organization: {} -- Team: {} -- Number of Seats: {}".format(driver[0], driver[4], driver[2], driver[3])
+        drive_temp2 = driTup(drive_temp)
+        driver_final.append(drive_temp2)
+    return driver_final
+
 
 # DELETE functionality
 def remove(request):
@@ -126,7 +170,7 @@ def remove(request):
 def remove_person(request):
     cursor = connection.cursor()
     p_name = request.POST.get('removeInput')
-    print("Person Name", p_name)
+    #print("Person Name", p_name)
     cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'".format(p_name))
     try:
         result_set = cursor.fetchone()[0]

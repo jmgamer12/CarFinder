@@ -7,6 +7,8 @@ $(document).ready(function () {
 
 function addToForm() {
     var radioVal = $("input[name='riderSelect']:checked").val();
+    var riderDiv = document.getElementById("riderDiv");
+    var formextend = document.getElementById("form-extension")
     if(radioVal === "driver"){
         add_html = '<br>' +
             '<div class="form-row">' +
@@ -18,17 +20,17 @@ function addToForm() {
             '        <label for="inputSeats">Number of Seats</label>' +
             '        <input type="number" class = "form-control" name="inputSeats" placeholder="# of Seats">' +
             '    </div>' +
-            '</div>' +
-            '<div>' +
-            '    <label>Time of Departure</label>' +
-            '</div>' +
-            '<select class="form-control">' +
-            '    <option>Early</option>' +
-            '    <option>Late</option>' +
-            '    <option>On time</option>' +
-            '</select>';
+            '</div>';
+            riderDiv.style.display = "none";
+            formextend.style.display = "block";
+    } else if(radioVal === "rider"){
+            riderDiv.style.display = "block";
+            formextend.style.display = "none";
+            add_html = '';
     } else {
         add_html = '';
+        formextend.style.display = "none";
+        riderDiv.style.display = "block";
     }
     $("#form-extension").html(add_html);
 
