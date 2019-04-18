@@ -5,8 +5,19 @@
             {% csrf_token %}
             <div class="form-row">
               <div class="form-group col-md-6">
-                  <label for="search_query">Search By</label>
+                  <label for="search_category">Search</label>
+                  <select name="query_category">
+                      <option value="People"> People</option>
+                      <option value="Cars"> Cars</option>
+                  </select>
+                 <!-- <input type="text" class = "form-control" id="inputOrg" name ="orgInput" placeholder="Organization"> -->
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                  <label for="search_query">Filter By</label>
                   <select name="query_select">
+                    <option value="All"> No Filter </option>
                       <option value="Person"> Person Name</option>
                       <option value="Org"> Organization Name</option>
                       <option value="Team"> Team Name</option>
@@ -20,7 +31,7 @@
 
                 <div class="form-group col-md-6">
                     <label for="inputName">Input</label>
-                    <input type="text" name="inputName" class = "form-control" id="inputName" placeholder="search">
+                    <input type="text" name="inputName" class = "form-control" id="inputName" placeholder="Search...Leave Blank if No Filter Selected">
                 </div>
 
             </div>
@@ -46,19 +57,46 @@
             <th><b></b></th>
         </tr>
         <tr>
+          {% if output == "Person" %}
             <th>Name</th>
             <th>Organization</th>
             <th>Team</th>
             <th>Phone</th>
+          {% endif %}
+
+          {% if output == "Car" %}
+            <th>Year</th>
+            <th>Make</th>
+            <th>Model</th>
+            <th>Seats</th>
+            <th>Owner</th>
+            <th>Organization</th>
+            <th>Team</th>
+            <th>Phone</th>
+          {% endif %}
+
         </tr>
         {% for entry in objects %}
         <tr>
-
+            {% if output == "Person" %}
             <td>{{ entry.p_name }}</td>
             <td>{{ entry.org_id }}</td>
             <td>{{ entry.team }}</td>
             <td>{{ entry.phone }}</td>
-            <td></td>
+            {% endif %}
+
+            {% if output == "Car" %}
+            <td>{{ entry.year }}</td>
+            <td>{{ entry.make }}</td>
+            <td>{{ entry.model }}</td>
+            <td>{{ entry.numSeats }}</td>
+            <td>{{ entry.p_name }}</td>
+            <td>{{ entry.org_id }}</td>
+            <td>{{ entry.team }}</td>
+            <td>{{ entry.phone }}</td>
+
+            {% endif %}
+
         </tr>
         {% endfor %}
     </table>

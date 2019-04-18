@@ -306,23 +306,48 @@ def search_return(request):
     cursor = connection.cursor()
     query_input = request.POST.get('inputName')
     search_by = request.POST.get('query_select')
-    person_list=[]
+    search=request.POST.get('query_category')
+    list=[]
+    output=""
     print("Search By", search_by)
     print("Query Input", query_input)
-    if(search_by=="Person"):
-        cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'".format(query_input))
-    elif(search_by=="Team"):
-        cursor.execute("SELECT * FROM findcar_person WHERE team='{}'".format(query_input))
-    elif(search_by=="Org"):
-        cursor.execute("SELECT * FROM findcar_person, findcar_organization WHERE findcar_organization.org_name='{}' AND findcar_organization.id=findcar_person.org_id;".format(query_input))
-    try:
-        for result_set in cursor.fetchall():
-            PersonTup = namedtuple('PersonTup', 'id p_name phone team departTime org_id')
-            person_i = PersonTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5])
-            person_list.append(person_i)
-        context = {'objects': person_list, "search_page": "active"}
-        print(result_set)
+    if(search=="People"):
+        if(search_by=="Name"):
+            cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'".format(query_input))
+        elif(search_by=="Team"):
+            cursor.execute("SELECT * FROM findcar_person WHERE team='{}'".format(query_input))
+        elif(search_by=="Org"):
+            cursor.execute("SELECT * FROM findcar_person, findcar_organization WHERE findcar_organization.org_name='{}' AND findcar_organization.id=findcar_person.org_id;".format(query_input))
+        elif(search_by=="All"):
+            cursor.execute("SELECT * FROM findcar_person")
 
+    elif(search=="Cars"):
+        if(search_by=="Name"):
+            cursor.execute("SELECT * FROM findcar_person P, findcar_car C, findcar_driver D WHERE P.id=D.PID_id AND C.id=D.CID_id AND P.p_name='{}'".format(query_input))
+        elif(search_by=="Team"):
+            cursor.execute("SELECT * FROM findcar_person P, findcar_car C, findcar_driver D WHERE P.id=D.PID_id AND C.id=D.CID_id AND P.team='{}'".format(query_input))
+        elif(search_by=="Org"):
+            cursor.execute("SELECT * FROM findcar_person P, findcar_car C, findcar_driver D, findcar_organization O WHERE P.id=D.PID_id AND C.id=D.CID_id AND O.org_name='{}' AND O.id=P.org_id;".format(query_input))
+        elif(search_by=="All"):
+            cursor.execute("SELECT * FROM findcar_person P, findcar_car C, findcar_driver D WHERE P.id=D.PID_id AND C.id=D.CID_id")
+    try:
+
+        if(search=="Cars"):
+            for result_set in cursor.fetchall():
+                CarTup = namedtuple('CarTup', 'p_id p_name phone team departTime org_id is_driver car_id numSeats timeDepart make model year')
+                car_i = CarTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5], result_set[6], result_set[7], result_set[8], result_set[9], result_set[10], result_set[11], result_set[12])
+                list.append(car_i)
+            output="Car"
+
+        else:
+            for result_set in cursor.fetchall():
+                PersonTup = namedtuple('PersonTup', 'id p_name phone team departTime org_id is_driver')
+                person_i = PersonTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5], result_set[6])
+                list.append(person_i)
+            output="Person"
+
+        context = {'objects': list, 'output': output, "search_page": "active"}
+        print(result_set)
     except my.DataError:
         print("DataError")
     except my.ProgrammingError:
