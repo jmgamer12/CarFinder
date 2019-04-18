@@ -55,6 +55,7 @@
             <th><b></b></th>
             <th><b></b></th>
             <th><b></b></th>
+            <th><b></b></th>
         </tr>
         <tr>
           {% if output == "Person" %}
@@ -62,6 +63,7 @@
             <th>Organization</th>
             <th>Team</th>
             <th>Phone</th>
+            <th>Drives?</th>
           {% endif %}
 
           {% if output == "Car" %}
@@ -79,22 +81,28 @@
         {% for entry in objects %}
         <tr>
             {% if output == "Person" %}
-            <td>{{ entry.p_name }}</td>
-            <td>{{ entry.org_id }}</td>
-            <td>{{ entry.team }}</td>
-            <td>{{ entry.phone }}</td>
+              <td>{{ entry.p_name }}</td>
+              <td>{{ entry.org_id }}</td>
+              <td>{{ entry.team }}</td>
+              <td>{{ entry.phone }}</td>
+              {% if entry.is_driver == 1 %}
+                <td> Yes! </td>
+              {% endif %}
+
+              {% if entry.is_driver == 0 %}
+                <td> No :( </td>
+              {% endif %}
             {% endif %}
 
             {% if output == "Car" %}
-            <td>{{ entry.year }}</td>
-            <td>{{ entry.make }}</td>
-            <td>{{ entry.model }}</td>
-            <td>{{ entry.numSeats }}</td>
-            <td>{{ entry.p_name }}</td>
-            <td>{{ entry.org_id }}</td>
-            <td>{{ entry.team }}</td>
-            <td>{{ entry.phone }}</td>
-
+              <td>{{ entry.year }}</td>
+              <td>{{ entry.make }}</td>
+              <td>{{ entry.model }}</td>
+              <td>{{ entry.numSeats }}</td>
+              <td>{{ entry.p_name }}</td>
+              <td>{{ entry.org_id }}</td>
+              <td>{{ entry.team }}</td>
+              <td>{{ entry.phone }}</td>
             {% endif %}
 
         </tr>

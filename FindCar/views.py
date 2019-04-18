@@ -154,11 +154,12 @@ def submission(request):
     #print("Person Name", p_name)
     p_phone = request.POST.get("inputPhone", '')
     p_team = request.POST.get("teamInput", '')
-
+    isDriver=0
     #check radio button status
     radioDR = request.POST.get('riderSelect')
     if radioDR == 'driver':
         # new driver to db
+        isDriver= 1
         d_car = request.POST.get('inputCar')
         d_carspl = d_car.split(' ')
         d_numSeats = request.POST.get('inputSeats')
@@ -179,7 +180,7 @@ def submission(request):
     connection.commit()
     #person = Person(p_name=p_name, phone=p_phone, team=p_team)
 
-    cursor.execute("INSERT INTO findcar_person (p_name, phone, team, departTime, isDriver, org_id) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(p_name, p_phone, p_team, '', 0, org_idd))
+    cursor.execute("INSERT INTO findcar_person (p_name, phone, team, departTime, isDriver, org_id) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(p_name, p_phone, p_team, '', isDriver, org_idd))
     connection.commit()
 
     #get id of inserted person
@@ -240,16 +241,35 @@ def remove(request):
     context = {"remove_page" : "active"}
     return render(request, 'remove.html', context)
 
-
 def remove_person(request):
     cursor = connection.cursor()
     p_name = request.POST.get('removeInput')
     #print("Person Name", p_name)
     cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'".format(p_name))
     try:
-        result_set = cursor.fetchone()[0]
-        if result_set:
-            cursor.execute("DELETE FROM findcar_person WHERE p_name='{}'".format(p_name))
+        result_set = cursor.fetchone()
+        if(result_set):
+            pid=result_set[0]
+            isDriver=result_set[6]
+
+            if(isDriver==1):
+                cursor.execute("SELECT * FROM findcar_driver WHERE PID_id='{}'".format(pid))
+                driver=cursor.fetchone()
+                if(driver):
+                    print(driver)
+                    cursor.execute("DELETE FROM findcar_driver WHERE PID_id='{}'".format(pid))
+            else:
+                cursor.execute("SELECT * FROM findcar_rider WHERE PID_id='{}'".format(pid))
+                rider=cursor.fetchone()
+                if(rider):
+                    print(rider)
+                    cursor.execute("DELETE FROM findcar_rider WHERE PID_id='{}'".format(pid))
+
+            cursor.execute("DELETE FROM findcar_person WHERE id='{}'".format(pid))
+
+            print(result_set)
+        # if pid:
+        #     cursor.execute("Select * FROM findcar_rider WHERE p_name='{}'".format(p_name))
     except my.DataError:
         print("DataError")
     except my.ProgrammingError:
@@ -259,6 +279,7 @@ def remove_person(request):
 
     context = {"remove_page": "active"}
     return render(request, 'remove.html', context)
+
 
 '''
 This function is supposed to find the name given in the form and determine if it is actually present
