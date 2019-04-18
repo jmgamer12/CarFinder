@@ -1,4 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <table>
+        <tr>
+            <th>Vehicle</th>
+            <th># of Seats</th>
+            <th>Combined MPG</th>
+            <th>Estimated Fuel Cost</th>
+        </tr>
+        {% for key, values in car_data.items %}
+        <tr>
+            <td>{{key}}</td>
+           {% for v in values %}:
+               <td>{{ v }}</td>
+            {% endfor %}
+            <td>3.50</td>
+        </tr>
+        {% endfor %}
+    </table>
 {% endblock %}

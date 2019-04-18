@@ -4,12 +4,14 @@ from collections import OrderedDict
 #https://docs.djangoproject.com/en/2.1/intro/tutorial03/
 
 from django.http import HttpResponse
+import requests
+import json
 from django.template import loader
 from .models import Person, Organization, Car
 from django.db import connection, transaction
 import MySQLdb as my
 from collections import namedtuple
-
+from xml.etree import ElementTree as ET
 PID = 1000
 org_idd = 1
 EID = 100
@@ -20,8 +22,72 @@ org_list_final = []
 
 
 # Home page
+def get_car_list():
+    cursor = connection.cursor()
+    cursor.execute("SELECT * from findcar_car")
+    car_list = dict()
+    for row in cursor.fetchall():
+        key = row[5] + " " + row[3] + " " + row[4]
+        mpg_seat_list = [row[1]]
+        car_list[key] = mpg_seat_list
+    return car_list
+
+
+def get_fegov_xml_helper(make, model, year):
+    url = "https://www.fueleconomy.gov/ws/rest/vehicle/menu/options?"
+    url += "year=" + year + "&make=" + make + "&model=" + model
+    response = requests.get(url)
+    xml = ET.fromstring(response.content)
+    return xml
+
+def get_fegov_xml(car):
+    car_arr = car.split()
+    url = "https://www.fueleconomy.gov/ws/rest/vehicle/menu/model?"
+    year = car_arr[0]
+    make = car_arr[1]
+    model = car_arr[2]
+    print("Model: ", model)
+    url += "year=" + year + "&make=" + make
+    print("List URL:", url)
+    response = requests.get(url)
+    xml = ET.fromstring(response.content)
+
+    for item in xml.findall('menuItem'):
+        val = item.find('value').text
+        #print("FindAll: ", val)
+        if model in val:
+            print("Found: ", val)
+            search_options_xml = get_fegov_xml_helper(make, val, year)
+            return search_options_xml
+    print("Did not Find Car")
+    return None
+
+
+def get_mpg(car_xml):
+    car_id = car_xml.find('menuItem').find('value').text
+    url = "https://www.fueleconomy.gov/ws/rest/vehicle/" + car_id
+    response = requests.get(url)
+    new_xml = ET.fromstring(response.content)
+
+    mpg = new_xml.find('comb08').text
+
+    return mpg
+
+
 def home(request):
-    context = {"home_page": "active"}
+
+    #response = requests.get(url)
+
+    curr_cars = get_car_list()
+    print(curr_cars)
+
+    for car, seats in curr_cars.items():
+        fegov_xml = get_fegov_xml(car)
+        mpg = get_mpg(fegov_xml)
+        seats.append(mpg)
+
+    print("Car List:", curr_cars)
+    context = {'car_data': curr_cars, "home_page": "active"}
     return render(request, 'home.html', context)
     #home_template = loader.get_template('home.html')
     #return HttpResponse(home_template.render())
