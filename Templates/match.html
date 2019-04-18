@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+    {% for group in cars %}
     <table>
         <tr>
             <th><b>Car:</b></th>
@@ -8,16 +9,16 @@
             <th><b></b></th>
         </tr>
         <tr>
-            <th>Car</th>
+            <th>Year/Make/Model</th>
             <th>Driver</th>
-            <th>Event</th>
-            <th>Number of Passengers</th>
+            <th>Organization</th>
+            <th>Maximum Passengers</th>
         </tr>
         <tr>
-            <td>Car1</td>
-            <td>Name1</td>
-            <td>Event1</td>
-            <td>0</td>
+            <td>{{ group.0.year }} {{ group.0.make }} {{ group.0.model }}</td>
+            <td>{{ group.0.p_name }}</td>
+            <td>{{ group.0.org_name }}</td>
+            <td>{{ group.0.numSeats }}</td>
         </tr>
         <tr>
             <th><b>Passengers:</b></th>
@@ -31,7 +32,7 @@
             <th>Phone</th>
             <th></th>
         </tr>
-        {% for person in people %}
+        {% for person in group %}
         <tr>
             <td>{{ person.p_name }}</td>
             <td>{{ person.team }}</td>
@@ -41,4 +42,28 @@
         {% endfor %}
     </table>
     <br><br>
+    {% endfor %}
+
+    <table>
+        <tr>
+            <th><b>People without a car</b></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <th>Team</th>
+            <th>Phone</th>
+            <th></th>
+        </tr>
+        {% for person in unmatched %}
+        <tr>
+            <td>{{ person.p_name }}</td>
+            <td>{{ person.team }}</td>
+            <td>{{ person.phone }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br><br><br><br>
 {% endblock %}

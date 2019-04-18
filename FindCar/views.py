@@ -55,7 +55,8 @@ def insert(request):
         print("Unknown Error")
 
     drivers = getDrivers()
-    context = {'items': org_list_final, "insert_page": "active", 'drivers': drivers}
+    events = getEvents()
+    context = {'items': org_list_final, "insert_page": "active", 'drivers': drivers, 'events':   events}
     return render(request, 'insert.html', context)
 
 
@@ -127,13 +128,18 @@ def submission(request):
         # adds connection to rider subclass
         r_prefDrive = request.POST.get('inputPref')
         r_drivername = r_prefDrive.split(" -- ")
-        cursor.execute("SELECT id FROM findcar_person WHERE p_name = '{}'".format(r_drivername[0]))
-        r_driverid = cursor.fetchone()[0]
+        print(r_drivername)
+        if r_drivername[0] == "No Preference":
+            r_driverid = -1
+        else:
+            cursor.execute("SELECT id FROM findcar_person WHERE p_name = '{}'".format(r_drivername[0]))
+            r_driverid = cursor.fetchone()[0]
         cursor.execute("INSERT INTO findcar_rider (preferredDriver, PID_id) VALUES ('{}', '{}')".format(r_driverid, person_id))
 
     refill_org_list(org_list_final)
+    events = getEvents()
     drivers = getDrivers()
-    context = {"insert_page": "active", 'items': org_list_final, 'drivers': drivers}
+    context = {"insert_page": "active", 'items': org_list_final, 'drivers': drivers, 'events': events}
     return render(request, 'insert.html', context)
 
 
@@ -264,18 +270,64 @@ def search_return(request):
 
 def match(request):
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM findcar_person;")
+    cursor.execute("SELECT p1.id, r.preferredDriver as driverId, p1.p_name, p1.team, p1.phone FROM findcar_rider r LEFT JOIN findcar_person p1 on r.PID_id = p1.id LEFt JOIN findcar_person p2 on p2.id = r.preferredDriver ORDER BY p2.id;")
+    result_set = cursor.fetchall()
+    cursor.execute("SELECT p.id, c.make, c.model, c.year, c.numSeats, p.p_name, o.org_name, p.team, p.phone FROM findcar_driver d LEFT JOIN findcar_person p on p.id = d.PID_id LEFT JOIN findcar_car c on d.CID_id = c.id LEFT JOIN findcar_organization o on p.org_id = o.id;")
+    car_set = cursor.fetchall()
 
     try:
-        result_set = cursor.fetchall()
         p1 = []
+        cars = []
 
-        PersonTup = namedtuple('PersonTup', 'id p_name phone team departTime org_id')
+        PersonTup = namedtuple('PersonTup', 'id driverId p_name team phone matched')
         for x in result_set:
-            temp_person = PersonTup(x[0], x[1], x[2], x[3], x[4], x[5])
+            temp_person = PersonTup(x[0], x[1], x[2], x[3], x[4], 0)
             p1.append(temp_person)
 
-        context = {"match_page": "active", "people": p1}
+        CarTup = namedtuple('CarTup', 'id make model year numSeats p_name org_name team phone remSeats')
+        for x in car_set:
+            temp_car = CarTup(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[4]-1)
+            cars.append(temp_car)
+
+        allcars = []
+        for x in cars:
+            matchedCar = []
+            matchedCar.append(x)
+            allcars.append(matchedCar)
+
+        for car in allcars:
+            for person in range(len(p1)):
+                if p1[person].driverId == car[0].id and car[0].remSeats > 0 and p1[person].matched == 0:
+                    p1[person] = p1[person]._replace(matched=1)
+                    car[0] = car[0]._replace(remSeats=car[0].remSeats - 1)
+                    car.append(p1[person])
+
+        for car in allcars:
+            for person in range(len(p1)):
+                if p1[person].team == car[0].team and car[0].remSeats > 0 and p1[person].matched == 0:
+                    p1[person] = p1[person]._replace(matched=1)
+                    car[0] = car[0]._replace(remSeats=car[0].remSeats - 1)
+                    car.append(p1[person])
+
+        for car in allcars:
+            for person in range(len(p1)):
+                if p1[person].matched == 0:
+                    p1[person] = p1[person]._replace(matched=1)
+                    car[0] = car[0]._replace(remSeats=car[0].remSeats - 1)
+                    car.append(p1[person])
+
+        allUnmatched = []
+        for person in range(len(p1)):
+            if p1[person].matched == 0:
+                p1[person] = p1[person]._replace(matched=1)
+                allUnmatched.append(p1[person])
+
+        if not allUnmatched:
+            message = "All people are matched"
+            endMessage = PersonTup("", "", message, "", "", "")
+            allUnmatched.append(endMessage)
+
+        context = {"match_page": "active", "cars": allcars, "unmatched": allUnmatched}
 
     except my.DataError:
         print("DataError")
@@ -288,3 +340,63 @@ def match(request):
         return render(request, 'match.html')
 
     return render(request, 'match.html', context)
+
+
+def events(request):
+    events = getEvents()
+    context = {"events_page": "active", "events": events}
+    return render(request, 'events.html', context)
+
+def events_add(request):
+    cursor = connection.cursor()
+
+    try:
+
+        ev_name = request.POST.get("inputEvent")
+        org_name = request.POST.get("inputOrg")
+        city = request.POST.get("inputCity")
+        state = request.POST.get("inputState")
+        date = request.POST.get("inputDate")
+        time = request.POST.get("inputTime")
+
+        datespl = date.split("/")
+        timeFinal = "{}-{}-{} {}".format(datespl[2], datespl[0], datespl[1], time)
+
+        location = "{}, {}".format(city, state)
+
+        cursor.execute("INSERT INTO findcar_event (time, location, org_name, ev_name) VALUES ('{}', '{}', '{}', '{}');".format(timeFinal, location, org_name, ev_name))
+        connection.commit()
+
+    except my.DataError:
+        print("DataError")
+        return render(request, 'match.html')
+    except my.ProgrammingError:
+        print("Exception Occured")
+        return render(request, 'match.html')
+    except:
+        print("Unknown Error")
+        return render(request, 'match.html')
+
+    events = getEvents()
+    context = {"events_page": "active", "events": events}
+    return render(request, 'events.html', context)
+
+def getEvents():
+    cursor = connection.cursor()
+
+    events = []
+
+    cursor.execute("SELECT * FROM findcar_event")
+    event_set = cursor.fetchall()
+
+    EventTup = namedtuple("EventTup", "id time location org_name ev_name")
+
+    for event in event_set:
+        temp_event = EventTup(event[0], event[1], event[2], event[3], event[4])
+        events.append(temp_event)
+
+    if not events:
+        temp_event2 = EventTup("", "", "", "No Events Registered", "")
+        events.append(temp_event2)
+
+    return events

@@ -40,5 +40,8 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('search_return/', views.search_return, name='search_return'),
 
-    path('match/', views.match, name='match')
+    path('match/', views.match, name='match'),
+
+    path('events/', views.events, name='events'),
+    path('events_add/', views.events_add, name='events_add')
 ]
