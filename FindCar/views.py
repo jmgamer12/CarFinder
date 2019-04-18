@@ -12,6 +12,7 @@ from django.db import connection, transaction
 import MySQLdb as my
 from collections import namedtuple
 from xml.etree import ElementTree as ET
+
 PID = 1000
 org_idd = 1
 EID = 100
@@ -130,8 +131,9 @@ def add_org_list(org_list):
     global org_list_final
     for i in org_list:
        # print(i[1])
-        org_list_final.append(i)
+        org_list_final.append(i[1])
     org_list_final = list(OrderedDict.fromkeys(org_list_final))
+    print(org_list_final)
    # print(org_list_final)
 
 
