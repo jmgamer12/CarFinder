@@ -296,13 +296,14 @@ def remove_person(request):
                     cid=driver[1]
                     print(driver)
                     print(cid)
-                    cursor.execute("SELECT * FROM findcar_car WHERE id='{}'".format(cid))
+                    cursor.execute("SELECT * FROM findcar_car C, findcar_driver D WHERE C.id='{}' AND D.PID_id='{}' AND C.id=D.CID_id".format(cid, pid))
                     car=cursor.fetchone()
                     print(car)
 
-                    cursor.execute("DELETE FROM findcar_driver WHERE PID_id='{}'".format(pid))
                     if(car):
+                        cursor.execute("DELETE FROM findcar_driver WHERE PID_id='{}'".format(pid))
                         cursor.execute("DELETE FROM findcar_car WHERE id='{}'".format(cid))
+                        cursor.execute("DELETE FROM findcar_person WHERE id='{}'".format(pid))
 
             else:
                 cursor.execute("SELECT * FROM findcar_rider WHERE PID_id='{}'".format(pid))
@@ -310,8 +311,7 @@ def remove_person(request):
                 if(rider):
                     print(rider)
                     cursor.execute("DELETE FROM findcar_rider WHERE PID_id='{}'".format(pid))
-
-            cursor.execute("DELETE FROM findcar_person WHERE id='{}'".format(pid))
+                    cursor.execute("DELETE FROM findcar_person WHERE id='{}'".format(pid))
 
             # print(result_set)
 
@@ -324,7 +324,7 @@ def remove_person(request):
 
     context = {"remove_page": "active"}
     return render(request, 'remove.html', context)
-
+    
 '''
 This function is supposed to find the name given in the form and determine if it is actually present
 in the table via try/except (if not in table cursor.fetchone should return a programming error)
@@ -439,36 +439,36 @@ def search_return(request):
     print("Query Input", query_input)
     if(search=="People"):
         if(search_by=="Name"):
-            cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'".format(query_input))
+            cursor.execute("SELECT * FROM findcar_person P, findcar_organization O WHERE P.p_name='{}' AND O.id=P.org_id".format(query_input))
         elif(search_by=="Team"):
-            cursor.execute("SELECT * FROM findcar_person WHERE team='{}'".format(query_input))
+            cursor.execute("SELECT * FROM findcar_person P, findcar_organization O WHERE P.team='{}' AND O.id=P.org_id".format(query_input))
         elif(search_by=="Org"):
-            cursor.execute("SELECT * FROM findcar_person, findcar_organization WHERE findcar_organization.org_name='{}' AND findcar_organization.id=findcar_person.org_id;".format(query_input))
+            cursor.execute("SELECT * FROM findcar_person P, findcar_organization O WHERE O.org_name='{}' AND O.id=P.org_id".format(query_input))
         elif(search_by=="All"):
-            cursor.execute("SELECT * FROM findcar_person")
+            cursor.execute("SELECT * FROM findcar_person P, findcar_organization O WHERE O.id=P.org_id ")
 
     elif(search=="Cars"):
         if(search_by=="Name"):
-            cursor.execute("SELECT * FROM findcar_person P, findcar_car C, findcar_driver D WHERE P.id=D.PID_id AND C.id=D.CID_id AND P.p_name='{}'".format(query_input))
+            cursor.execute("SELECT * FROM findcar_person P, findcar_car C, findcar_organization O, findcar_driver D WHERE P.id=D.PID_id AND C.id=D.CID_id AND P.p_name='{}' AND O.id=P.org_id".format(query_input))
         elif(search_by=="Team"):
-            cursor.execute("SELECT * FROM findcar_person P, findcar_car C, findcar_driver D WHERE P.id=D.PID_id AND C.id=D.CID_id AND P.team='{}'".format(query_input))
+            cursor.execute("SELECT * FROM findcar_person P, findcar_car C, findcar_organization O, findcar_driver D WHERE P.id=D.PID_id AND C.id=D.CID_id AND P.team='{}' AND O.id=P.org_id".format(query_input))
         elif(search_by=="Org"):
-            cursor.execute("SELECT * FROM findcar_person P, findcar_car C, findcar_driver D, findcar_organization O WHERE P.id=D.PID_id AND C.id=D.CID_id AND O.org_name='{}' AND O.id=P.org_id;".format(query_input))
+            cursor.execute("SELECT * FROM findcar_person P, findcar_car C, findcar_organization O, findcar_driver D WHERE P.id=D.PID_id AND C.id=D.CID_id AND O.org_name='{}' AND O.id=P.org_id;".format(query_input))
         elif(search_by=="All"):
-            cursor.execute("SELECT * FROM findcar_person P, findcar_car C, findcar_driver D WHERE P.id=D.PID_id AND C.id=D.CID_id")
+            cursor.execute("SELECT * FROM findcar_person P, findcar_car C, findcar_organization O, findcar_driver D WHERE P.id=D.PID_id AND C.id=D.CID_id AND O.id=P.org_id")
     try:
 
         if(search=="Cars"):
             for result_set in cursor.fetchall():
-                CarTup = namedtuple('CarTup', 'p_id p_name phone team departTime org_id is_driver car_id numSeats timeDepart make model year')
-                car_i = CarTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5], result_set[6], result_set[7], result_set[8], result_set[9], result_set[10], result_set[11], result_set[12])
+                CarTup = namedtuple('CarTup', 'p_id p_name phone team departTime org_id is_driver car_id numSeats timeDepart make model year oid org_name')
+                car_i = CarTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5], result_set[6], result_set[7], result_set[8], result_set[9], result_set[10], result_set[11], result_set[12], result_set[13], result_set[14])
                 list.append(car_i)
             output="Car"
 
         else:
             for result_set in cursor.fetchall():
-                PersonTup = namedtuple('PersonTup', 'id p_name phone team departTime org_id is_driver')
-                person_i = PersonTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5], result_set[6])
+                PersonTup = namedtuple('PersonTup', 'pid p_name phone team departTime org_id is_driver oid org_name')
+                person_i = PersonTup(result_set[0], result_set[1], result_set[2], result_set[3], result_set[4], result_set[5], result_set[6], result_set[7], result_set[8])
                 list.append(person_i)
             output="Person"
 
@@ -483,7 +483,6 @@ def search_return(request):
         return render(request, 'search.html')
 
     return render(request, 'search.html', context)
-
 #matching ------------------------------------------------------------------
 def match(request):
     cursor = connection.cursor()
