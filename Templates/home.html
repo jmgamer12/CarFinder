@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <table>
+    <table id="cars" name="cars" class="cars">
         <tr>
             <th>Vehicle</th>
             <th># of Seats</th>
@@ -18,4 +18,31 @@
         </tr>
         {% endfor %}
     </table>
+    <br>
+    <table class="eventTable">
+        <tr>
+            <th><b>Events:</b></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+        <tr>
+            <th>Organization</th>
+            <th>Event</th>
+            <th>Location</th>
+            <th>Time</th>
+        </tr>
+        {% for event in events %}
+        <tr class='clickable-event'>
+            <td>{{ event.org_name }}</td>
+            <td>{{ event.ev_name }}</td>
+            <td id="loc">{{ event.location }}</td>
+            <td>{{ event.time }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <div class="map" id="map" ></div>
+    <br>
+    <br>
 {% endblock %}

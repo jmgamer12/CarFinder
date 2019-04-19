@@ -20,10 +20,16 @@ CID = 1
 
 org_list = []
 org_list_final = []
+curr_cars = dict()
+num_cars = 0
 
+headers = {
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:12.0'
+}
 
 # Home page
 def get_car_list():
+    global num_cars
     cursor = connection.cursor()
     cursor.execute("SELECT * from findcar_car")
     car_list = dict()
@@ -31,17 +37,20 @@ def get_car_list():
         key = row[5] + " " + row[3] + " " + row[4]
         mpg_seat_list = [row[1]]
         car_list[key] = mpg_seat_list
+        num_cars += 1
     return car_list
 
 
 def get_fegov_xml_helper(make, model, year):
+    global headers
     url = "https://www.fueleconomy.gov/ws/rest/vehicle/menu/options?"
     url += "year=" + year + "&make=" + make + "&model=" + model
-    response = requests.get(url)
+    response = requests.get(url, headers=headers)
     xml = ET.fromstring(response.content)
     return xml
 
 def get_fegov_xml(car):
+    global headers
     car_arr = car.split()
     url = "https://www.fueleconomy.gov/ws/rest/vehicle/menu/model?"
     year = car_arr[0]
@@ -50,7 +59,7 @@ def get_fegov_xml(car):
     print("Model: ", model)
     url += "year=" + year + "&make=" + make
     print("List URL:", url)
-    response = requests.get(url)
+    response = requests.get(url, headers=headers)
     xml = ET.fromstring(response.content)
 
     for item in xml.findall('menuItem'):
@@ -65,9 +74,10 @@ def get_fegov_xml(car):
 
 
 def get_mpg(car_xml):
+    global headers
     car_id = car_xml.find('menuItem').find('value').text
     url = "https://www.fueleconomy.gov/ws/rest/vehicle/" + car_id
-    response = requests.get(url)
+    response = requests.get(url, headers=headers)
     new_xml = ET.fromstring(response.content)
 
     mpg = new_xml.find('comb08').text
@@ -76,8 +86,12 @@ def get_mpg(car_xml):
 
 
 def home(request):
-
+    global curr_cars, num_cars
     #response = requests.get(url)
+
+    if num_cars == len(curr_cars) and num_cars != 0:
+        context = {'car_data': curr_cars, "home_page": "active"}
+        return render(request, 'home.html', context)
 
     curr_cars = get_car_list()
     print(curr_cars)
@@ -88,7 +102,8 @@ def home(request):
         seats.append(mpg)
 
     print("Car List:", curr_cars)
-    context = {'car_data': curr_cars, "home_page": "active"}
+    events_home = getEvents()
+    context = {'car_data': curr_cars, "home_page": "active", 'events': events_home}
     return render(request, 'home.html', context)
     #home_template = loader.get_template('home.html')
     #return HttpResponse(home_template.render())
