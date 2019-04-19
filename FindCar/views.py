@@ -152,6 +152,24 @@ def add_org_list(org_list):
    # print(org_list_final)
 
 
+def get_org_id(org_name):
+     cursor = connection.cursor()
+     cursor.execute("SELECT * from findcar_organization WHERE org_name='{}'".format(org_name))
+     result_id = cursor.fetchone()[0]
+     return result_id
+
+
+def check_dup(org_name):
+    cursor = connection.cursor()
+    cursor.execute("SELECT org_name from findcar_organization WHERE org_name='{}'".format(org_name))
+    result_name = cursor.fetchone()
+    print("RESULT NAME: ", result_name)
+    if result_name is not None:
+        return 1
+    else:
+        return 0
+
+
 def submission(request):
 
     cursor = connection.cursor()
@@ -182,16 +200,20 @@ def submission(request):
         connection.commit()
 
     if (o_add_name != ""):
-        org_list_final.append(o_add_name)
-        cursor.execute(
-            "INSERT INTO findcar_organization (org_name) VALUES ('{}')".format(
-                o_add_name))
+        dup = check_dup(o_add_name)
+        if dup == 0:
+            org_list_final.append(o_add_name)
+            cursor.execute(
+                "INSERT INTO findcar_organization (org_name) VALUES ('{}')".format(
+                    o_add_name))
+            connection.commit()
+        org_idd = get_org_id(o_add_name)
 
     else:
-        cursor.execute(
-            "INSERT INTO findcar_organization (org_name) VALUES ('{}')".format(
-                o_name))
-    connection.commit()
+        org_idd = get_org_id(o_name)
+    print("ORG ID: ", org_idd)
+
+
     #person = Person(p_name=p_name, phone=p_phone, team=p_team)
 
     cursor.execute("INSERT INTO findcar_person (p_name, phone, team, departTime, isDriver, org_id) VALUES ('{}', '{}', '{}', '{}', '{}', '{}')".format(p_name, p_phone, p_team, '', isDriver, org_idd))
