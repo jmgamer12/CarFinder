@@ -393,6 +393,21 @@ def update_person(request):
                 cursor.execute("SELECT id FROM findcar_car WHERE numSeats = '{}' AND make = '{}'".format(d_numSeats, d_carspl[1]))
                 car_id = cursor.fetchone()[0]
                 cursor.execute("INSERT INTO findcar_driver (CID_id, PID_id) VALUES ('{}', '{}')".format(car_id, result_set[0]))
+            elif radioVal == "rider" and prevVal == 0:
+                r_prefDrive = request.POST.get('inputPref')
+                r_drivername = r_prefDrive.split(" -- ")
+                if r_drivername[0] == "No Preference":
+                    r_driverid = -1
+                else:
+                    cursor.execute("SELECT id FROM findcar_person WHERE p_name = '{}'".format(r_drivername[0]))
+                    r_driverid = cursor.fetchone()[0]
+                cursor.execute("UPDATE findcar_rider SET preferredDriver='{}'".format(r_driverid))
+            elif radioVal == "driver" and prevVal == 1:
+                d_car = request.POST.get('inputCar')
+                d_carspl = d_car.split(' ')
+                d_numSeats = request.POST.get('inputSeats')
+                cursor.execute(
+                    "UPDATE findcar_car SET make='{}', model='{}', year='{}', numSeats='{}'".format(d_carspl[1], d_carspl[2], d_carspl[0], d_numSeats))
 
             cursor.execute("UPDATE findcar_person SET phone='{}', team='{}', isDriver='{}' WHERE p_name='{}'".format(p_phone, p_team, 0 if radioVal == "rider" else 1, p_name))
             connection.commit()
