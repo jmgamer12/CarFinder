@@ -7,8 +7,9 @@
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="org_select">Organization</label>
-                    <select class="form-control"  id="org_select" name="org_select" onchange="addNewOrg()" >
-                        <option value="0">Add New Organization ++</option>
+                    <select class="form-control"  id="org_select" name="org_select">
+                        <option value="0"></option>
+                        <option value="1">Add New Organization ++</option>
                         {% for entry in items %}
                         <option value="{{ entry }}">{{ entry }}</option>
                         {% endfor %}
@@ -20,6 +21,7 @@
                     <input type="text" class = "form-control" id="inputTeam" name="teamInput" placeholder="Team">
                 </div>
             </div>
+            <div id="org_form-extension"></div>
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="inputName">Name</label>

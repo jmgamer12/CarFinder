@@ -54,22 +54,7 @@ function calculate_mileage(distance, price) {
     }
 }
 
-function changeDirections(e) {
-    e = e || window.event;
-    //alert(e.innerHTML);
-    var row = e.innerHTML;
-    var endpt = row.getElementById('loc');
-    alert(endpt);
 
-    L.mapquest.directions().route({
-      start: startpt,
-      end: endpt,
-      options: {
-        timeOverage: 25,
-        maxRoutes: 3,
-      }
-    });
-}
 
 function loadMap () {
     L.mapquest.key = key;

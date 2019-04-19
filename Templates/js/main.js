@@ -5,8 +5,16 @@ $(document).ready(function () {
 
 });
 
+$(document).ready(function () {
+    $("#org_select").change(function (e) {
+        alert("Clicked dropdown");
+        $("#org_select option[value=0]").remove();
+        addNewOrg();
+    })
+});
+
 function addNewOrg() {
-    if (document.getElementById("org_select").value === "0") {
+    if (document.getElementById("org_select").value === "1") {
         alert("Entered if");
         add_html = '<br>' +
             '<div class="form-row">' +
