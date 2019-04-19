@@ -252,11 +252,21 @@ def remove_person(request):
             isDriver=result_set[6]
 
             if(isDriver==1):
+                cursor.execute("UPDATE findcar_rider SET preferredDriver = -1 WHERE preferredDriver='{}'".format(pid))
                 cursor.execute("SELECT * FROM findcar_driver WHERE PID_id='{}'".format(pid))
                 driver=cursor.fetchone()
                 if(driver):
+                    cid=driver[1]
                     print(driver)
+                    print(cid)
+                    cursor.execute("SELECT * FROM findcar_car WHERE id='{}'".format(cid))
+                    car=cursor.fetchone()
+                    print(car)
+
                     cursor.execute("DELETE FROM findcar_driver WHERE PID_id='{}'".format(pid))
+                    if(car):
+                        cursor.execute("DELETE FROM findcar_car WHERE id='{}'".format(cid))
+
             else:
                 cursor.execute("SELECT * FROM findcar_rider WHERE PID_id='{}'".format(pid))
                 rider=cursor.fetchone()
@@ -266,9 +276,8 @@ def remove_person(request):
 
             cursor.execute("DELETE FROM findcar_person WHERE id='{}'".format(pid))
 
-            print(result_set)
-        # if pid:
-        #     cursor.execute("Select * FROM findcar_rider WHERE p_name='{}'".format(p_name))
+            # print(result_set)
+
     except my.DataError:
         print("DataError")
     except my.ProgrammingError:
@@ -278,7 +287,6 @@ def remove_person(request):
 
     context = {"remove_page": "active"}
     return render(request, 'remove.html', context)
-
 
 '''
 This function is supposed to find the name given in the form and determine if it is actually present

@@ -18,7 +18,7 @@
                   <label for="search_query">Filter By</label>
                   <select name="query_select">
                     <option value="All"> No Filter </option>
-                      <option value="Person"> Person Name</option>
+                      <option value="Name"> Person Name</option>
                       <option value="Org"> Organization Name</option>
                       <option value="Team"> Team Name</option>
                   </select>
@@ -56,6 +56,11 @@
             <th><b></b></th>
             <th><b></b></th>
             <th><b></b></th>
+            {% if output == "Car" %}
+              <th><b></b></th>
+              <th><b></b></th>
+              <th><b></b></th>
+            {% endif %}
         </tr>
         <tr>
           {% if output == "Person" %}
@@ -82,7 +87,7 @@
         <tr>
             {% if output == "Person" %}
               <td>{{ entry.p_name }}</td>
-              <td>{{ entry.org_id }}</td>
+              <td>{{ entry.org_name }}</td>
               <td>{{ entry.team }}</td>
               <td>{{ entry.phone }}</td>
               {% if entry.is_driver == 1 %}
@@ -100,7 +105,7 @@
               <td>{{ entry.model }}</td>
               <td>{{ entry.numSeats }}</td>
               <td>{{ entry.p_name }}</td>
-              <td>{{ entry.org_id }}</td>
+              <td>{{ entry.org_name }}</td>
               <td>{{ entry.team }}</td>
               <td>{{ entry.phone }}</td>
             {% endif %}
