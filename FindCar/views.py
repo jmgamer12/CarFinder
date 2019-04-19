@@ -133,7 +133,7 @@ def add_org_list(org_list):
        # print(i[1])
         org_list_final.append(i[1])
     org_list_final = list(OrderedDict.fromkeys(org_list_final))
-    print(org_list_final)
+    #print(org_list_final)
    # print(org_list_final)
 
 
@@ -166,7 +166,6 @@ def submission(request):
         cursor.execute("INSERT INTO findcar_car (numSeats, timeDepart, make, model, year) VALUES ('{}', '{}', '{}', '{}', '{}')".format(d_numSeats, '0000-00-00 00:00:00', d_carspl[1], d_carspl[2], d_carspl[0]))
         connection.commit()
 
-
     if (o_add_name != ""):
         org_list_final.append(o_add_name)
         cursor.execute(
@@ -197,7 +196,7 @@ def submission(request):
         # adds connection to rider subclass
         r_prefDrive = request.POST.get('inputPref')
         r_drivername = r_prefDrive.split(" -- ")
-        print(r_drivername)
+        #print(r_drivername)
         if r_drivername[0] == "No Preference":
             r_driverid = -1
         else:
@@ -236,7 +235,7 @@ def getDrivers():
     return driver_final
 
 
-# DELETE functionality
+# DELETE functionality --------------------------------------------------------------------------------------
 def remove(request):
     context = {"remove_page" : "active"}
     return render(request, 'remove.html', context)
@@ -290,25 +289,77 @@ be a raw query as well
 '''
 
 
-# UPDATE functionality
+# UPDATE functionality ---------------------------------------------------------------------------
 def update(request):
-    context = {"update_page" : "active"}
+    drivers = getDrivers()
+    hide = "none"
+    refill_org_list(org_list_final)
+    context = {"update_page": "active", "drivers": drivers, "hide": hide, "orgs": org_list_final}
     return render(request, 'update.html', context)
 
 
 def update_person(request):
     cursor = connection.cursor()
+    PerTup = namedtuple("PerTup", "name phone team org isDriver")
+    people = []
     p_name = request.POST.get('personName')
-    print("Person Name", p_name)
-    cursor.execute("SELECT * FROM findcar_person WHERE p_name='{}'".format(p_name))
+    cursor.execute("SELECT p.id, p_name, phone, team, org_name, isDriver FROM findcar_person p LEFT JOIN findcar_organization o ON p.org_id = o.id WHERE p.p_name='{}'".format(p_name))
     try:
-        result_set = cursor.fetchone()[0]
-        if (result_set):
+        result_set = cursor.fetchone()
+        if result_set:
             p_phone = request.POST.get("inputPhone", '')
             p_team = request.POST.get("teamInput", '')
-            #o_name = request.POST.get("orgInput")
-            cursor.execute("UPDATE findcar_person SET phone='{}', team='{}' WHERE p_name='{}'".format(p_phone, p_team, p_name))
+            if p_phone == "":
+                p_phone = result_set[2]
+            if p_team == "":
+                p_team = result_set[3]
 
+            radioVal = request.POST.get("riderSelect")
+            prevVal = result_set[5]
+            if radioVal == "rider" and prevVal == 1:
+                #delete car, delete relation in driver, add relation in rider
+                cursor.execute("SELECT d.PID_id as pid, d.CID_id as cid FROM findcar_person p LEFT JOIN findcar_driver d ON p.id = d.PID_id LEFT JOIN findcar_car c ON d.CID_id = c.id WHERE p.id = '{}';".format(result_set[0]))
+                carRelate = cursor.fetchone()
+                cursor.execute("DELETE FROM findcar_driver WHERE PID_id = '{}' AND CID_id = '{}'".format(carRelate[0], carRelate[1]))
+                connection.commit()
+                cursor.execute("DELETE FROM findcar_car WHERE id = '{}'".format(carRelate[1]))
+                connection.commit()
+
+                #adds relation
+                r_prefDrive = request.POST.get('inputPref')
+                r_drivername = r_prefDrive.split(" -- ")
+                if r_drivername[0] == "No Preference":
+                    r_driverid = -1
+                else:
+                    cursor.execute("SELECT id FROM findcar_person WHERE p_name = '{}'".format(r_drivername[0]))
+                    r_driverid = cursor.fetchone()[0]
+                cursor.execute("INSERT INTO findcar_rider (preferredDriver, PID_id) VALUES ('{}', '{}')".format(r_driverid, result_set[0]))
+            elif radioVal == "driver" and prevVal == 0:
+                #delete relation in rider, add car
+                cursor.execute("SELECT PID_id as pid, preferredDriver as did FROM findcar_person p LEFT JOIN findcar_rider r ON p.id = r.PID_id WHERE p.id = '{}';".format(result_set[0]))
+                riderRelate = cursor.fetchone()
+                cursor.execute("DELETE FROM findcar_rider WHERE PID_id = '{}' AND preferredDriver = '{}'".format(riderRelate[0], riderRelate[1]))
+
+                d_car = request.POST.get('inputCar')
+                d_carspl = d_car.split(' ')
+                d_numSeats = request.POST.get('inputSeats')
+                cursor.execute("INSERT INTO findcar_car (numSeats, timeDepart, make, model, year) VALUES ('{}', '{}', '{}', '{}', '{}')".format(d_numSeats, '0000-00-00 00:00:00', d_carspl[1], d_carspl[2], d_carspl[0]))
+
+                cursor.execute("SELECT id FROM findcar_car WHERE numSeats = '{}' AND make = '{}'".format(d_numSeats, d_carspl[1]))
+                car_id = cursor.fetchone()[0]
+                cursor.execute("INSERT INTO findcar_driver (CID_id, PID_id) VALUES ('{}', '{}')".format(car_id, result_set[0]))
+
+            cursor.execute("UPDATE findcar_person SET phone='{}', team='{}', isDriver='{}' WHERE p_name='{}'".format(p_phone, p_team, 0 if radioVal == "rider" else 1, p_name))
+            connection.commit()
+
+            cursor.execute("SELECT p.id, p_name, phone, team, org_name, isDriver FROM findcar_person p LEFT JOIN findcar_organization o ON p.org_id = o.id WHERE p.p_name='{}'".format(p_name))
+            newperson = cursor.fetchone()
+
+            oldPerson = PerTup(result_set[1], result_set[2], result_set[3], result_set[4], "No" if result_set[5] == 0 else "Yes")
+            updatedPerson = PerTup(newperson[1], newperson[2], newperson[3], newperson[4], "No" if newperson[5] == 0 else "Yes")
+
+            people.append(oldPerson)
+            people.append(updatedPerson)
     except my.DataError:
         print("DataError")
     except my.ProgrammingError:
@@ -316,11 +367,18 @@ def update_person(request):
     except:
         print("Unknown Error")
 
-    context = {"update_page": "active"}
+    drivers = getDrivers()
+    hide = "block"
+    if not people:
+        noperson = PerTup("No one found :(", "", "", "", "")
+        people.append(noperson)
+        people.append(noperson)
+    refill_org_list(org_list_final)
+    context = {"update_page": "active", "drivers": drivers, "people": people, "hide": hide, "orgs": org_list_final}
     return render(request, 'update.html', context)
 
 
-# SEARCH functionality
+# SEARCH functionality ----------------------------------------------------------
 def search(request):
     context = {"search_page": "active"}
     return render(request, 'search.html', context)
@@ -381,7 +439,7 @@ def search_return(request):
 
     return render(request, 'search.html', context)
 
-
+#matching ------------------------------------------------------------------
 def match(request):
     cursor = connection.cursor()
     cursor.execute("SELECT p1.id, r.preferredDriver as driverId, p1.p_name, p1.team, p1.phone FROM findcar_rider r LEFT JOIN findcar_person p1 on r.PID_id = p1.id LEFt JOIN findcar_person p2 on p2.id = r.preferredDriver ORDER BY p2.id;")
@@ -400,7 +458,7 @@ def match(request):
 
         CarTup = namedtuple('CarTup', 'id make model year numSeats p_name org_name team phone remSeats')
         for x in car_set:
-            temp_car = CarTup(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[4]-1)
+            temp_car = CarTup(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[4])
             cars.append(temp_car)
 
         allcars = []
@@ -411,21 +469,21 @@ def match(request):
 
         for car in allcars:
             for person in range(len(p1)):
-                if p1[person].driverId == car[0].id and car[0].remSeats > 0 and p1[person].matched == 0:
+                if p1[person].driverId == car[0].id and car[0].remSeats > 1 and p1[person].matched == 0:
                     p1[person] = p1[person]._replace(matched=1)
                     car[0] = car[0]._replace(remSeats=car[0].remSeats - 1)
                     car.append(p1[person])
 
         for car in allcars:
             for person in range(len(p1)):
-                if p1[person].team == car[0].team and car[0].remSeats > 0 and p1[person].matched == 0:
+                if p1[person].team == car[0].team and car[0].remSeats > 1 and p1[person].matched == 0:
                     p1[person] = p1[person]._replace(matched=1)
                     car[0] = car[0]._replace(remSeats=car[0].remSeats - 1)
                     car.append(p1[person])
 
         for car in allcars:
             for person in range(len(p1)):
-                if p1[person].matched == 0:
+                if p1[person].matched == 0 and car[0].remSeats > 1:
                     p1[person] = p1[person]._replace(matched=1)
                     car[0] = car[0]._replace(remSeats=car[0].remSeats - 1)
                     car.append(p1[person])
@@ -455,7 +513,7 @@ def match(request):
 
     return render(request, 'match.html', context)
 
-
+#Events ------------------------------------------------------------
 def events(request):
     events = getEvents()
     context = {"events_page": "active", "events": events}

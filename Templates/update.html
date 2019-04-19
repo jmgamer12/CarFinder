@@ -12,8 +12,12 @@
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
-                    <label for="inputOrg">Organization</label>
-                    <input type="text" class = "form-control" id="inputOrg" name ="orgInput" placeholder="Organization">
+                    <label>Organization</label>
+                    <select class="form-control" name="orgPref">
+                        {% for org in orgs %}
+                        <option>{{ org }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="form-group col-md-6">
                     <label for="inputTeam">Team</label>
@@ -25,7 +29,7 @@
                 </div>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="riderSelect" id="radioRider" value="rider">
+                <input class="form-check-input" type="radio" name="riderSelect" id="radioRider" value="rider" checked="checked">
                 <label class="form-check-label" for="radioRider">Rider</label>
             </div>
             <div class="form-check form-check-inline">
@@ -33,8 +37,60 @@
                 <label class="form-check-label" for="radioDriver">Driver</label>
             </div>
             <div id="form-extension"></div>
+            <div id="riderDiv">
+                <br>
+                <label>Select your preferred driver</label>
+                <select class="form-control" name="inputPref">
+                    {% for driver in drivers %}
+                    <option>{{ driver.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <br>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
+    </div>
+    <br>
+    <div style="display: {{ hide }};">
+        <div class="container" style="width:46%;">
+            <p><b>Old</b></p>
+        </div>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Organization</th>
+                <th>Team</th>
+                <th>Driver</th>
+            </tr>
+            <tr>
+                <td>{{ people.0.name }}</td>
+                <td>{{ people.0.phone }}</td>
+                <td>{{ people.0.org }}</td>
+                <td>{{ people.0.team }}</td>
+                <td>{{ people.0.isDriver }}</td>
+            </tr>
+        </table>
+        <br>
+        <div class="container" style="width:46%;">
+            <p><b>Updated</b></p>
+        </div>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Organization</th>
+                <th>Team</th>
+                <th>Driver</th>
+            </tr>
+            <tr>
+                <td>{{ people.1.name }}</td>
+                <td>{{ people.1.phone }}</td>
+                <td>{{ people.1.org }}</td>
+                <td>{{ people.1.team }}</td>
+                <td>{{ people.1.isDriver }}</td>
+            </tr>
+        </table>
+        <br><br><br><br>
     </div>
 {% endblock %}
