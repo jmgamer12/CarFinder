@@ -88,10 +88,16 @@ def get_mpg(car_xml):
 def home(request):
     global curr_cars, num_cars
     #response = requests.get(url)
-
-    if num_cars == len(curr_cars) and num_cars != 0:
-        context = {'car_data': curr_cars, "home_page": "active"}
+    curr_cars = get_car_list()
+    print(curr_cars)
+    '''
+        if num_cars == len(curr_cars) and num_cars != 0:
+        events_home = getEvents()
+        print("EVENTS: ", events_home)
+        context = {'car_data': curr_cars, "home_page": "active", 'events': events_home}
         return render(request, 'home.html', context)
+    '''
+
 
     curr_cars = get_car_list()
     print(curr_cars)
@@ -103,6 +109,7 @@ def home(request):
 
     print("Car List:", curr_cars)
     events_home = getEvents()
+    print("EVENTS: ", events_home)
     context = {'car_data': curr_cars, "home_page": "active", 'events': events_home}
     return render(request, 'home.html', context)
     #home_template = loader.get_template('home.html')
@@ -302,8 +309,11 @@ def remove_person(request):
 
                     if(car):
                         cursor.execute("DELETE FROM findcar_driver WHERE PID_id='{}'".format(pid))
+                        connection.commit()
                         cursor.execute("DELETE FROM findcar_car WHERE id='{}'".format(cid))
+                        connection.commit()
                         cursor.execute("DELETE FROM findcar_person WHERE id='{}'".format(pid))
+                        connection.commit()
 
             else:
                 cursor.execute("SELECT * FROM findcar_rider WHERE PID_id='{}'".format(pid))

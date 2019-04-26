@@ -7,7 +7,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
     $("#org_select").change(function (e) {
-        alert("Clicked dropdown");
+        //alert("Clicked dropdown");
         $("#org_select option[value=0]").remove();
         addNewOrg();
     })
@@ -15,16 +15,21 @@ $(document).ready(function () {
 
 function addNewOrg() {
     if (document.getElementById("org_select").value === "1") {
-        alert("Entered if");
+        //alert("Entered if");
         add_html = '<br>' +
             '<div class="form-row">' +
             '    <div class="form-group col-md-6">' +
             '        <label for="inputOrg">Add Organization</label>' +
-            '        <input type="text" class="form-control" name="inputOrg" placeholder="Organization">' +
+            '        <input type="text" class="form-control" name="inputOrg" placeholder="Ex. Track, Field, Etc.">' +
             '    </div>' +
             '</div>';
         $("#org_form-extension").html(add_html);
     }
+    else {
+        add_html = "";
+        $("#org_form-extension").html(add_html);
+    }
+
 }
 
 function addToForm() {
